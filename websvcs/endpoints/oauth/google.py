@@ -31,6 +31,17 @@ class GoogleOAuth2Handler(tornado.web.RequestHandler):
 
             self.set_secure_cookie("whoami", user_email, expires_days=None)
             self.redirect(options.client_host)
+        elif "oauth2_client" in self.request.uri:
+            parsed = urlparse.urlparse(self.request.uri)
+            access_token = urlparse.parse_qs(parsed.query)["access_token"][0]
+
+            http_client = tornado.httpclient.HTTPClient()
+            response = http_client.fetch("https://www.googleapis.com/oauth2/v1/userinfo?access_token=%s"%(access_token))
+            creds = json.loads(response.body)
+            user_email = creds["email"]
+            SaveUserinfo(user_email,creds)
+            # TODO : Determine if we can trust a cookie set in client 
+
         else:
             userkey = self.get_secure_cookie("whoami")
             credentials = GetUserinfo(userkey)

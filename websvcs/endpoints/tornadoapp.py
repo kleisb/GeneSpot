@@ -114,6 +114,7 @@ def main():
         (r"/data?(.*)", LocalFileHandler),
         (r"/auth/signin/google", GoogleOAuth2Handler),
         (r"/auth/signin/google/oauth2_callback", GoogleOAuth2Handler),
+        (r"/auth/signin/google/oauth2_client", GoogleOAuth2Handler),
         (r"/auth/signout/google", GoogleSignoutHandler),
         (r"/auth/whoami", WhoamiHandler),
         (r"/auth/providers", AuthProvidersHandler),
