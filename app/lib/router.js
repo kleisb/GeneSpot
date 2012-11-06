@@ -98,7 +98,13 @@ module.exports = Backbone.Router.extend({
 
         var ViewClass = qed.Views[view_name];
         var view = new ViewClass(view_options);
-        this.$el.html(view.render().el);
-        return view;
+
+        var NewWindowTemplate = require("../views/templates/new_window_template");
+        this.$el.append(NewWindowTemplate({ "id": "w_" + dataset_id, "title": catalog_unit.label || dataset_id, "url": uri }));
+
+
+        var newwindow = this.$el.find("#w_" + dataset_id);
+        newwindow.draggable({ scroll: true, handle: "h5" });
+        newwindow.find(".content-item").html(view.render().el);
     }
 });
