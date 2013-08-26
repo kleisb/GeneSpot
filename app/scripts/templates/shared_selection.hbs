@@ -1,0 +1,68 @@
+<style>
+    .user-bubble {
+        width: 300px;
+        margin: 5px;
+
+        -webkit-border-radius: 17px;
+        -moz-border-radius: 17px;
+        border-radius: 17px;
+        border: 3px solid #FFFF00;
+        background-color: #FAFAFA;
+        -webkit-box-shadow: #C7C7C7 13px 13px 13px;
+        -moz-box-shadow: #C7C7C7 13px 13px 13px;
+        box-shadow: #C7C7C7 13px 13px 13px;
+    }
+
+    .user-bubble .user-pic {
+        width: 50px;
+        -webkit-border-radius: 17px;
+        -moz-border-radius: 17px;
+        margin-left: 10px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border-radius: 17px;
+        border: 5px solid #FFFF00;
+    }
+
+    .user-bubble .text-caption {
+        text-align: justify;
+        margin-left: 20px;
+        margin-top: 5px;
+    }
+</style>
+<div class="container">
+    <h4>Participants</h4>
+    {{#each participants}}
+    <div class="user-bubble">
+        <div class="row">
+            <div class="span1">
+                <img class="user-pic" src="{{user.pic}}" alt="No profile picture"/>
+            </div>
+            <div class="span3">
+                <h5>{{user.fullname}}</h5>
+            <span>
+            <a href="{{user.profileLink}}" target="_blank"><img class="signin-pic" src="https://www.google.com/images/icons/ui/gprofile_button-64.png"
+                                                                alt="&nbsp;"/></a>
+            </span>
+                <span class="label label-info">joined session at {{joinedAt}}</span>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+
+    <h4>Selections</h4>
+    {{#each selections}}
+    <div class="user-bubble">
+        <div class="row">
+            <div class="span1">
+                <img class="user-pic" src="{{user.pic}}" alt="No profile picture"/>
+            </div>
+            <div class="span3 text-caption">
+                <span class="label label-info">Notice</span>
+
+                <div>{{description}}</div>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>

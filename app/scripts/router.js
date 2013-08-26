@@ -1,21 +1,26 @@
 define   (['jquery', 'underscore', 'backbone', 'bootstrap',
+    'models/websockets',
     'views/topbar_view',
     'views/data_menu_modal',
     'views/data_menu_sections',
-    'views/sessions_view'
+    'views/sessions_view',
+    'views/shared_selection'
 ],
 function ( $,        _,            Backbone, Bootstrap,
+           WebSocketsModel,
            TopNavBar,
            DataMenuModal,
            DataMenuSections,
-           SessionsView) {
+           SessionsView,
+           SharedSelectionView) {
 
 return Backbone.Router.extend({
     targetEl: "#mainDiv",
     routes:{
         "":"home_view",
         "v/*uri/:view_name":"viewsByUri",
-        "s/*sessionId": "loadSessionById"
+        "s/*sessionId": "loadSessionById",
+        "shs/*sessionId": "loadSharedSessionById"
     },
 
     initialize: function(options) {
@@ -77,7 +82,30 @@ return Backbone.Router.extend({
             }
         }
     },
-    
+
+    loadSharedSessionById: function(sharedSessionId) {
+        console.log("loadSharedSessionById(" + sharedSessionId + ")");
+
+        var webSocketsModel = new WebSocketsModel({
+            "ws": "ws/shared-sessions/" + sharedSessionId
+        });
+        webSocketsModel.on("message", function(e) {
+            console.log("ws:message:" + e);
+        });
+        webSocketsModel.on("error", function(e) {
+            console.log("ws:error:" + e);
+        });
+        webSocketsModel.on("close", function(e) {
+            console.log("ws:close:" + e);
+        });
+
+        var sharedSelectionView = new SharedSelectionView({
+            Router: this,
+            model: webSocketsModel
+        });
+        webSocketsModel.trigger("load");
+    },
+
     home_view:function () {
         // TODO
     },
