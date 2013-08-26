@@ -11,6 +11,7 @@ require.config({
         d3: '../bower_components/d3/d3',
         modernizr: '../bower_components/modernizr',
         underscore: '../bower_components/underscore/underscore',
+        "moment": "../bower_components/momentjs/moment",
         hbs : '../bower_components/require-handlebars-plugin/hbs',
         handlebars : '../bower_components/require-handlebars-plugin/Handlebars',
         'json2' : '../bower_components/require-handlebars-plugin/hbs/json2',
