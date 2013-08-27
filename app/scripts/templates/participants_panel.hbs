@@ -1,0 +1,20 @@
+<div class="container">
+    <h4>Participants</h4>
+    {{#each participants}}
+    <div class="user-bubble">
+        <div class="row">
+            <div class="span1">
+                <img class="user-pic" src="{{user.pic}}" alt="No profile picture"/>
+            </div>
+            <div class="span3">
+                <h5>{{user.fullname}}</h5>
+            <span>
+                <a href="{{user.profileLink}}" target="_blank"><img class="signin-pic" src="https://www.google.com/images/icons/ui/gprofile_button-64.png"
+                                                                alt="&nbsp;"/></a>
+            </span>
+                <span class="label label-info">joined session at {{joinedAt}}</span>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>

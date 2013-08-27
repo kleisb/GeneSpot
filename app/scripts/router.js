@@ -4,7 +4,8 @@ define   (['jquery', 'underscore', 'backbone', 'bootstrap',
     'views/data_menu_modal',
     'views/data_menu_sections',
     'views/sessions_view',
-    'views/shared_selection'
+    'views/shared_selection',
+    'views/participants_panel'
 ],
 function ( $,        _,            Backbone, Bootstrap,
            WebSocketsModel,
@@ -12,7 +13,7 @@ function ( $,        _,            Backbone, Bootstrap,
            DataMenuModal,
            DataMenuSections,
            SessionsView,
-           SharedSelectionView) {
+           SharedSelectionView, ParticipantsView) {
 
 return Backbone.Router.extend({
     targetEl: "#mainDiv",
@@ -100,6 +101,10 @@ return Backbone.Router.extend({
         });
 
         var sharedSelectionView = new SharedSelectionView({
+            Router: this,
+            model: webSocketsModel
+        });
+        var participantsView = new ParticipantsView({
             Router: this,
             model: webSocketsModel
         });

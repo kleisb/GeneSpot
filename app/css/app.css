@@ -1,42 +1,43 @@
 body {
-	padding-top: 43px;
+    padding-top: 43px;
 }
 
 .imgbrand {
-	height: 35px;
-	width: 35px;
-	padding-right: 10px;
-}
-.navbar .brand {
-	padding: 3px 20px 2px;
+    height: 35px;
+    width: 35px;
+    padding-right: 10px;
 }
 
-.graph-container, .filter-container{
-	border: 2px solid black;
+.navbar .brand {
+    padding: 3px 20px 2px;
+}
+
+.graph-container, .filter-container {
+    border: 2px solid black;
 }
 
 .graph-container {
-	height:800px;
+    height: 800px;
 }
 
-.filter-container .parcoords{ 
-	height:300px;
+.filter-container .parcoords {
+    height: 300px;
 }
 
 .slick-cell-checkboxsel {
-	background: #f0f0f0;
-	border-right-color: silver;
-	border-right-style: solid;
+    background: #f0f0f0;
+    border-right-color: silver;
+    border-right-style: solid;
 }
 
 .grid-container {
-  background: white;
-  outline: 0;
-  border: 1px solid gray;
+    background: white;
+    outline: 0;
+    border: 1px solid gray;
 }
 
 .circ-container {
-	height: 800px;
+    height: 800px;
 }
 
 .signin-container {
@@ -75,7 +76,7 @@ body {
 }
 
 .hangout_link {
-    text-decoration:none;
+    text-decoration: none;
 }
 
 .hangout_link img {
@@ -83,4 +84,35 @@ body {
     width: 86px;
     height: 20px;
     margin-top: -5px;
+}
+
+.user-bubble {
+    width: 300px;
+    margin: 5px;
+
+    -webkit-border-radius: 17px;
+    -moz-border-radius: 17px;
+    border-radius: 17px;
+    border: 3px solid #FFFF00;
+    background-color: #FAFAFA;
+    -webkit-box-shadow: #C7C7C7 13px 13px 13px;
+    -moz-box-shadow: #C7C7C7 13px 13px 13px;
+    box-shadow: #C7C7C7 13px 13px 13px;
+}
+
+.user-bubble .user-pic {
+    width: 50px;
+    -webkit-border-radius: 17px;
+    -moz-border-radius: 17px;
+    margin-left: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 17px;
+    border: 5px solid #FFFF00;
+}
+
+.user-bubble .text-caption {
+    text-align: justify;
+    margin-left: 20px;
+    margin-top: 5px;
 }
