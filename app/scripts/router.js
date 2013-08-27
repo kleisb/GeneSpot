@@ -100,15 +100,17 @@ return Backbone.Router.extend({
             console.log("ws:close:" + e);
         });
 
-        var sharedSelectionView = new SharedSelectionView({
+        var ssView = new SharedSelectionView({
             Router: this,
             model: webSocketsModel
         });
-        var participantsView = new ParticipantsView({
+        var ppView = new ParticipantsView({
             Router: this,
             model: webSocketsModel
         });
-        webSocketsModel.trigger("load");
+
+        this.$el.append(ssView.render().el);
+        this.$el.append(ppView.render().el);
     },
 
     home_view:function () {

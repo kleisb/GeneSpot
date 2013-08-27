@@ -5,9 +5,9 @@ define(["jquery", "underscore", "backbone", "moment",
 
         return Backbone.View.extend({
             initialize: function () {
-                _.bindAll(this, "render");
+                _.bindAll(this, "render", "addParticipants");
 
-                this.model.on("load", this.render);
+                this.model.on("add-participants", this.addParticipants);
             },
 
             render: function () {
@@ -32,7 +32,16 @@ define(["jquery", "underscore", "backbone", "moment",
                     ]
                 };
 
-                $(document.body).append(ParticipantsPanelTpl(participants));
+                // TODO : render participants pPanel
+                this.$el.html(ParticipantsPanelTpl(participants));
+
+                return this;
+            },
+
+            addParticipants: function(p) {
+                console.log("addParticipants(" + p + ")");
+
+                // TODO : add participant to panel
             }
         });
     });

@@ -5,9 +5,9 @@ define(["jquery", "underscore", "backbone",
 
         return Backbone.View.extend({
             initialize: function () {
-                _.bindAll(this, "render");
+                _.bindAll(this, "render", "addSelection");
 
-                this.model.on("load", this.render);
+                this.model.on("add-selection", this.addSelection);
             },
 
             render: function () {
@@ -35,7 +35,13 @@ define(["jquery", "underscore", "backbone",
                     "comments": []
                 };
 
-                $(document.body).append(SharedSelectionTpl(sharedSelection));
+                this.$el.html(SharedSelectionTpl(sharedSelection));
+
+                return this;
+            },
+
+            addSelection: function(s) {
+                console.log("addSelection(" + s + ")");
             }
         });
     });
