@@ -19,6 +19,7 @@
         "bootstrap-dropdown-checkbox": "git://github.com/cancerregulome/bootstrap-dropdown-checkbox",
         "colorbrewer": "git://github.com/undashes/colorbrewer.git",
         "stacksvis": "git://github.com/cancerregulome/StacksVis#improving_layout",
+        "seqpeek": "git://github.com/IlyaLab/SeqPeek#genespot",
         "carve": "~0.0.4"
     },
     "resolutions": {
