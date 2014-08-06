@@ -1,15 +1,19 @@
 define(["jquery", "underscore", "backbone",
     "router",
     "models/sessions", "models/datamodel", "models/lookups",
-    "views/items_grid_view"],
-    function ($, _, Backbone, AppRouter, SessionsCollection, Datamodel, LookupsModel, ItemGridView) {
+    "views/items_grid_view", "views/pivot_data_view", "views/search_control",
+    "models/gs/item_set"],
+    function ($, _, Backbone, AppRouter, SessionsCollection, Datamodel, LookupsModel, ItemGridView, PivotDataView, SearchControl,
+        GeneSpotItemSet
+    ) {
         WebApp = {
             Events: _.extend(Backbone.Events),
 
             Annotations: {},
             Views: {
                 "grid": ItemGridView,
-                "items_grid": ItemGridView
+                "items_grid": ItemGridView,
+                "pivot_data_view": PivotDataView
             },
             Lookups: new LookupsModel(),
             Display: new Backbone.Model(),
@@ -20,7 +24,10 @@ define(["jquery", "underscore", "backbone",
                 Active: null,
                 Producers: {}
             },
-            UserPreferences: new Backbone.Model()
+            LocalSession: new Backbone.Model(), // TODO : Add Sync
+            UserPreferences: new Backbone.Model(),
+            Search: new SearchControl(),
+            ItemSets: new GeneSpotItemSet()
         };
 
         WebApp.initialize = function () {
@@ -66,9 +73,24 @@ define(["jquery", "underscore", "backbone",
                     WebApp.Events.trigger("webapp:ready:sessions");
                 }
             });
+
+            WebApp.LocalSession.fetch({ "url": "svc/collections/local_session" });
+
+            WebApp.ItemSets.fetch();
         };
 
-        _.bindAll(WebApp, "initialize");
+        WebApp.alert = function(alertEl, timeout) {
+            $(alertEl).show();
+            _.delay(function() {
+                $(alertEl).hide({ "effect": "fade" });
+            }, timeout || 2000);
+        };
+
+        WebApp.getItemSets = function() {
+            return this.ItemSets;
+        };
+
+        _.bindAll(WebApp, "initialize", "getItemSets");
 
         return WebApp;
     });

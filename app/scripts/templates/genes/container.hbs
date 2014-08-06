@@ -1,0 +1,55 @@
+<h4>Gene Lists</h4>
+<div class="row">
+    <div class="span4">
+        <div class="input-append">
+            <input type="text" class="new-list-name" placeholder="New list name...">
+            <button class="btn add-new-list" type="button" title="Add a list"><i class="icon-plus"></i></button>
+            <button class="btn list-refresh" type="button" title="Reload lists"><i class="icon-refresh"></i></button>
+        </div>
+    </div>
+    <div class="span3">
+        <span class="alert alert-danger invalid-list-name hide">
+            <strong>Error!</strong> Not a valid list name
+        </span>
+        <span class="alert alert-danger duplicate-list-name hide">
+            <strong>Error!</strong> List name already exists
+        </span>
+        <span class="alert alert-success list-added-success hide">
+            <strong>Success!</strong> New list added
+        </span>
+        <span class="alert alert-success gene-added-success hide">
+            <strong>Success!</strong> Gene added to list
+        </span>
+        <span class="alert alert-warning duplicate-gene-entered hide">
+            <strong>Oops!</strong> Gene already in list
+        </span>
+    </div>
+</div>
+<div class="row">
+    <div class="span7">
+        <div class="tabs-left">
+            <ul class="nav nav-tabs gene-lists">
+                {{#each genelists}}
+                    <li{{#unless @index}} class="active"{{/unless}} data-id="{{id}}"><a
+                            href="#tab-glists-glist-{{id}}" data-toggle="tab">{{label}}</a></li>
+                {{/each}}
+            </ul>
+        </div>
+
+        <div class="tab-content">
+            {{#each genelists}}
+                <div class="tab-pane{{#unless @index}} active{{/unless}}" id="tab-glists-glist-{{id}}">
+                    <input class="genes-typeahead" type="text" placeholder="Add a gene to {{label}}..."/>
+                    <ul class="gene-selector nav nav-list"></ul>
+                    {{#unless isDefault}}
+                        <hr/>
+                        <div class="btn-group">
+                            <button class="btn btn-small list-remover" data-id="{{id}}" type="button"><i class="icon-trash"></i></button>
+                            <button class="btn btn-small list-remover" data-id="{{id}}" type="button">Delete list '{{label}}'</button>
+                        </div>
+                    {{/unless}}
+                </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

@@ -15,26 +15,6 @@
     position: absolute;
 }
 
-.atlas-zoom {
-    padding: 5px;
-    width: 97%;
-    height: 97%;
-    z-index: -1;
-    position: absolute;
-}
-
-.atlas-navigator {
-    float: left;
-    left: 5px;
-    top: 200px;
-    position: fixed;
-    border: 1px solid #87cefa;
-    border-radius: 15px;
-    background: #ffffff;
-    height: 150px;
-    padding-top: 15px;
-}
-
 .atlas-map {
     position: absolute;
     z-index: 10;
@@ -78,6 +58,16 @@
     padding-left: 10px;
 }
 
+.atlas-map > .nav {
+    margin-bottom: 10px;
+}
+
+.map-contents {
+    width: auto;
+    zoom: 1;
+    margin-left: 5px;
+}
+
 .showing-border {
     border: 1px solid black;
 }
@@ -117,16 +107,6 @@
 
 .ui-effects-transfer {
     border: 1px dotted black;
-}
-
-.maps-n-genes {
-    position: fixed;
-    top:44px;
-    right:20px;
-}
-
-.maps-n-genes li {
-    padding-right: 10px;
 }
 
 .genelist-members {
@@ -608,4 +588,16 @@ td.vertical_cell {
 .minigraph-legend {
     border: 3px solid steelblue;
     border-radius: 15%;
+}
+
+.cytoscape-container {
+    min-height: 400px;
+}
+
+.cytoscape-container > div {
+    height: 400px;
+}
+
+.q-values {
+    white-space: nowrap;
 }

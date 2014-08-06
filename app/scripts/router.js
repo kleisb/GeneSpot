@@ -1,11 +1,13 @@
-define(["jquery", "underscore", "backbone", "bootstrap", "views/topbar_view", "views/gs/atlas"],
-    function ($, _, Backbone, Bootstrap, TopNavBar, AtlasView) {
+define(["jquery", "underscore", "backbone", "bootstrap", "views/topbar_view",
+    "views/gs/atlas", "models/atlas/map_factory"],
+    function ($, _, Backbone, Bootstrap, TopNavBar, AtlasView, MapFactory) {
 
         return Backbone.Router.extend({
-            targetEl: "#mainDiv",
+            targetEl: "#main-container",
             navigationEl: "#navigation-container",
             routes: {
                 "": "atlas",
+                "cm/:cm_id": "load_collected_map",
                 "v/*uri/:view_name": "viewsByUri",
                 "s/*sessionId": "loadSessionById"
             },
@@ -102,15 +104,47 @@ define(["jquery", "underscore", "backbone", "bootstrap", "views/topbar_view", "v
             },
 
             atlas: function () {
-                var model = new Backbone.Model();
+                var model = new MapFactory();
+                model.on("load", function(){
+                    this.$el.html(view.render().el);
+                    this.$el.fadeIn();
+                }, this);
 
                 var view = new AtlasView({ "model": model });
-                this.$el.html(view.render().el);
 
-                model.fetch({
-                    "url": "configurations/atlas.json",
-                    "success": function () {
-                        model.trigger("load");
+                this.$el.fadeOut({
+                    "always": function() {
+                        model.fetch({
+                            "url": "configurations/atlas.json",
+                            "success": function () {
+                                model.trigger("load");
+                            }
+                        });
+                    }
+                });
+
+                return view;
+            },
+
+            load_collected_map: function (collected_map_id) {
+                console.debug("router.load_collected_map:" + collected_map_id);
+
+                var model = new MapFactory();
+                var view = new AtlasView({ "model": model });
+
+                var _this = this;
+                this.$el.fadeOut({
+                    "always": function() {
+                        model.fetch({
+                            "url": "svc/collections/collected_maps/" + collected_map_id,
+                            "success": function () {
+                                _this.$el.html(view.render().el);
+                                model.trigger("load");
+
+                                _this.$el.fadeIn();
+                            },
+                            "error": _this.atlas
+                        });
                     }
                 });
 

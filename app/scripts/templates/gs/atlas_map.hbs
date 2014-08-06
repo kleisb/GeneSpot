@@ -1,0 +1,31 @@
+<div class="atlas-map" data-mapid="{{id}}" style="top: {{assignedPosition.top}}px; left: {{assignedPosition.left}}px; z-index: {{assignedZindex}}">
+    <button type="button" class="close" data-id="{{id}}">&times;</button>
+    <ul class="nav nav-pills inline">
+        <li>
+            <h5><a href="#" onclick="return false;">{{label}}</a></h5>
+        </li>
+        <li><a href="#" onclick="return false;" class="info-me"> <i class="icon-info-sign" /></i> </a></li>
+        <li><a href="#" onclick="return false;" class="notes-me disabled" rel="tooltip" title="Take Notes (todo:notes_view)"> <i class="icon-pencil"/></i> </a></li>
+        <li><a href="#" onclick="return false;" class="refresh-me" rel="tooltip" title="Refresh Data"> <i class="icon-refresh"/></i> </a></li>
+        <!--<li><a href="#" onclick="return false;" class="collect-me" rel="tooltip" title="Collect Map"> <i class="icon-briefcase"/></i> </a></li>-->
+    </ul>
+    <ul class="nav nav-tabs">
+        {{#each views}}
+        <li class="{{#unless @index}}active{{/unless}}">
+            <a href="#tab_{{uid}}" onclick="return false;" data-toggle="tab">{{label}}</a>
+        </li>
+        {{/each}}
+        {{#if downloads}}
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="return false" rel="tooltip" title="Download Data">Downloads <b class="caret"/></a>
+            <ul class="dropdown-menu download-links">
+            </ul>
+        </li>
+        {{/if}}
+    </ul>
+    <div class="tab-content">
+        {{#each views}}
+        <div id="tab_{{uid}}" class="tab-pane {{#unless @index}}active{{/unless}} map-contents"></div>
+        {{/each}}
+    </div>
+</div>

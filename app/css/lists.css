@@ -1,0 +1,90 @@
+.list-controls {
+    position: fixed;
+    top: 50px;
+    left:0;
+    width: 150px;
+}
+
+.list-controls-qt {
+    width: 150px;
+    background-color: darkgray;
+    padding-top: 30px;
+    padding-right: 30px;
+    padding-bottom: 30px;
+}
+
+.list-containers {
+    position: fixed;
+    top: 50px;
+    left: 190px;
+}
+
+.list-controls > li > a, .list-controls-qt > li > a {
+    display: block;
+    margin-top: 3px;
+    padding-top: 8px;
+    padding-left: 8px;
+
+    border: 1px solid #e3e3e3;
+    background-color: lightgray;
+    font-size: medium;
+
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    -webkit-border-bottom-right-radius: 10px;
+    -webkit-border-top-right-radius: 10px;
+    -moz-border-radius-bottomright: 10px;
+    -moz-border-radius-topright: 10px;
+}
+
+.list-controls > li > a > i, .list-controls-qt > li > a > i {
+    opacity: .25;
+}
+
+.list-container > div {
+    padding: 10px;
+    border: 1px solid #e3e3e3;
+    background-color: #f5f5f5;
+}
+
+.list-container > div {
+    max-height: 600px;
+    max-width: 600px;
+    overflow-y:scroll;
+}
+
+.gene-lists .active a {
+    font-weight:bold;
+}
+
+.gene-selector {
+    max-width: 200px;
+    max-height: 300px;
+    overflow-y: scroll;
+}
+
+.gene-selector .btn-group {
+    margin-bottom: 4px;
+}
+
+.gene-selector .btn-group .btn-success {
+    min-width: 80px;
+}
+
+.clinvar-lists .active a {
+    font-weight:bold;
+}
+
+.clinvar-selector {
+    max-width: 800px;
+    max-height: 300px;
+    overflow-y: scroll;
+}
+
+.clinvar-selector .btn-group {
+    margin-bottom: 4px;
+}
+
+.clinvar-selector .btn-group .btn-success {
+    min-width: 80px;
+}

@@ -1,0 +1,20 @@
+<h4>Tumor Types</h4>
+<div class="well">
+    <a class="btn btn-info btn-mini apply" href="#" onclick="return false;">Apply Selection Change</a>
+</div>
+<table class="table table-condensed table-bordered tumor-types-selector">
+    <thead>
+    <tr>
+        <th>Selected</th>
+        <th>TCGA ID</th>
+        <th>Label</th>
+    </tr>
+    </thead>
+    {{#each tumor_types}}
+        <tr{{#if isChecked}} class="success"{{/if}}>
+            <td><input type="checkbox" data-id="{{id}}" {{#if isChecked}} checked="checked"{{/if}}/></td>
+            <td>{{id}}</td>
+            <td>{{label}}</td>
+        </tr>
+    {{/each}}
+</table>

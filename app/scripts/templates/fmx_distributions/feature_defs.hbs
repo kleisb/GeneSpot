@@ -1,0 +1,13 @@
+<div class="feature-defs tabbable tabs-left">
+    <ul class="nav nav-tabs">
+        <li><a class="brand" href="#" onclick="return false;"><strong>{{axis}}-axis</strong></a></li>
+        {{#each feature_sources}}
+        <li><a id="tab-{{uid}}" data-toggle="tab" href="#tab-pane-{{uid}}" onclick="return false;">{{label}}</a></li>
+        {{/each}}
+    </ul>
+    <div class="tab-content">
+        {{#each feature_sources}}
+        <ul id="tab-pane-{{uid}}" data-uid="{{uid}}" class="{{item_class}} tab-pane nav nav-list"></ul>
+        {{/each}}
+    </div>
+</div>

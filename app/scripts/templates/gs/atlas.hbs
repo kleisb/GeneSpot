@@ -7,38 +7,74 @@
         background-size: initial;
     }
 </style>
-<div>
-    <ul class="atlas-navigator nav nav-list">
-        <li><a href="#" onclick="return false;" class="zoom-home" rel="toolbar" title="Reset Zoom Level"> <i class="icon-home"/></i> </a></li>
-        <li><a href="#" onclick="return false;" class="zoom-in" rel="toolbar" title="Zoom In"> <i class="icon-zoom-in"/></i> </a></li>
-        <li><a href="#" onclick="return false;" class="zoom-out" rel="toolbar" title="Zoom Out"> <i class="icon-zoom-out"/></i> </a></li>
-        <li><a href="#" onclick="return false;" class="resize-item" rel="toolbar" title="Resize Map"> <i class="icon-resize-full"/></i> </a></li>
-        <li><a href="#" onclick="return false;" class="refresh-loaded" rel="toolbar" title="Refresh Map Data"> <i class="icon-refresh"/></i> </a></li>
-    </ul>
+<ul class="list-controls nav nav-list">
+    <li>
+        <div class="btn-group">
+            <button class="btn btn-mini refresh-loaded" type="button"><i class="icon-refresh"></i></button>
+            <button class="btn btn-mini refresh-loaded" type="button">Refresh All</button>
+        </div>
+    </li>
+    <li class="divider"/>
+    <li>
+        <a href="#" onclick="return false;" data-toggle="collapse" data-target="#maps-collapser">Visualizations <i class="pull-right icon-chevron-right"></i></a>
+    </li>
+    <li>
+        <a href="#" onclick="return false;" data-toggle="collapse" data-target="#datamodel-collapser">Databases <i class="pull-right icon-chevron-right"></i></a>
+    </li>
+    <li class="divider"/>
+    <li>
+        <a href="#" onclick="return false;" data-toggle="collapse" data-target="#tumor-types-collapser">Tumor Types <i class="pull-right icon-chevron-right"></i></a>
+    </li>
+    <li>
+        <a href="#" onclick="return false;" data-toggle="collapse" data-target="#genelist-collapser">Gene Lists <i class="pull-right icon-chevron-right"></i></a>
+    </li>
+    <li>
+        <a href="#" onclick="return false;" data-toggle="collapse" data-target="#clinvarlist-collapser">Clinical and Sample Variables <i class="pull-right icon-chevron-right"></i></a>
+    </li>
+    <li>
+        <a href="#" onclick="return false;" data-toggle="collapse" data-target="#samplelist-collapser">Sample Lists <i class="pull-right icon-chevron-right"></i></a>
+    </li>
+    <li class="divider"/>
+    <!--<li>-->
+        <!--<a href="#" onclick="return false;" data-toggle="collapse" data-target="#collected-maps-collapser">Collected Maps <i class="pull-right icon-chevron-right"></i></a>-->
+    <!--</li>-->
+    <li>
+        <a href="#" onclick="return false;" data-toggle="collapse" data-target="#datasheets-collapser">Data Sheets <i class="pull-right icon-chevron-right"></i></a>
+    </li>
+    <li class="divider"/>
+    <li>
+        <a href="http://cancergenome.nih.gov/publications/publicationguidelines" target="_blank">TCGA Publication Guidelines</a>
+    </li>
+</ul>
 
-    <ul class="nav nav-pills pull-right maps-n-genes">
-        <li class="dropdown">
-            <button class="maps-btn dropdown-toggle btn btn-success" data-toggle="dropdown" type="button">Maps</button>
-            <ul class="dropdown-menu maps-selector"></ul>
-        </li>
-        <li class="dropdown">
-            <button class="dropdown-toggle btn btn-success" data-toggle="dropdown" type="button">Genes</button>
-            <ul class="dropdown-menu gene-selector">
-                <li><a href="#" onclick="return false;" class="item-remover" data-id="KRAS">KRAS <i class="icon-trash"></i> </a></li>
-                <li><a href="#" onclick="return false;" class="item-remover" data-id="TP53">TP53 <i class="icon-trash"></i> </a></li>
-                <li><a href="#" onclick="return false;" class="item-remover" data-id="akr1c4">akr1c4 <i class="icon-trash"></i> </a></li>
-                <li><a href="#" onclick="return false;" class="item-remover" data-id="ccnd1">ccnd1 <i class="icon-trash"></i> </a></li>
-            </ul>
-        </li>
-        <li>
-            <input class="genes-typeahead" type="text" placeholder="Add a gene..."/>
-        </li>
-    </ul>
+<div class="list-containers">
+    <div id="datamodel-collapser" class="list-container collapse">
+        <div class="datamodel-collector-container"></div>
+    </div>
+    <div id="maps-collapser" class="list-container collapse">
+        <div class="maps-list-container"></div>
+    </div>
+    <div id="tumor-types-collapser" class="list-container collapse">
+        <div class="tumor-types-container"></div>
+    </div>
+    <div id="genelist-collapser" class="list-container collapse">
+        <div class="genelist-container"></div>
+    </div>
+    <div id="clinvarlist-collapser" class="list-container collapse">
+        <div class="clinvarlist-container"></div>
+    </div>
+    <div id="samplelist-collapser" class="list-container collapse">
+        <div class="samplelist-container"></div>
+    </div>
+    <!--<div id="collected-maps-collapser" class="list-container collapse">-->
+        <!--<div class="collected-maps-container"></div>-->
+    <!--</div>-->
+    <div id="datasheets-collapser" class="list-container collapse">
+        <div class="datasheets-container"></div>
+    </div>
 </div>
 
 <div class="atlas-body">
     <div class="atlas-canvas">
-        <div class="atlas-zoom">
-        </div>
     </div>
 </div>

@@ -1,109 +1,101 @@
 {
+    "default_genelist": ["BRCA1", "RAD51", "TP53", "KRAS", "CC2D1A"],
+    "all_tags_url": "svc/datastores/FFN/LOOKUPS/all_tags",
+    "all_clinical_url": "svc/datastores/FFN/LOOKUPS/all_clinical",
     "maps": [
         {
-            "id": "seqpeekv2",
-            "label": "Mutations Per Cancer Type",
-            "isOpen": true,
+            "id": "mutations_combo",
+            "label": "Mutations",
+            "description": "This visualization combines multiple mutation data types, including TCGA MutSig CV data produced by Firehose",
+            "keywords": ["Interpro", "Protein Mutations"],
             "position": {
-                "top": 300,
-                "left": 20
+                "top": 0,
+                "left": 150
             },
             "views": [
                 {
-                    "id": "seqpeekv2",
+                    "view": "views/seqpeek/view",
                     "label": "SeqPeek",
+                    "protein_domains": "svc/datastores/interpro/interpro/interpro",
+                    "bar_plot_threshold": 50,
                     "datamodels": {
-                        "mutations_map": "datamodel/mutations/Mutations_Per_Cancer_type"
+                        "mutations":  {
+                            "uri": "datamodel/tcga_datawarehouse",
+                            "url_suffix": "/mutation_summary"
+                        },
+                        "mutsig": "datamodel/mutations/mutsig_rankings",
+                        "mutated_samples": {
+                            "uri": "datamodel/tcga_datawarehouse",
+                            "url_suffix": "/mutated_samples"
+                        }
                     }
-                }
-            ]
-        },
-        {
-            "id": "mutsig_ranks",
-            "label": "MutSig Ranks",
-            "description": "This dataset was prepared from TCGA MutSig CV data produced by Firehose.",
-            "isOpen": false,
-            "position": {
-                "top": 10,
-                "left": 50
-            },
-            "views": [
-                {
-                    "view": "mutsig_grid",
-                    "label": "Selected Genes",
-                    "datamodel": "datamodel/mutations/mutsig_rankings"
                 },
                 {
-                    "view": "mutsig_top_genes",
-                    "label": "Top 20",
-                    "datamodel": "datamodel/mutations/mutsig_top20"
-                }
-            ]
-        },
-        {
-            "id": "pubcrawl_lit_search",
-            "label": "Pubcrawl Literature Search",
-            "links": {
-                "home": "http://pubcrawl.systemsbiology.net"
-            },
-            "disabled": false,
-            "views": [
-                {
-                    "view": "pubcrawl_network",
-                    "label": "Network",
-                    "source": "pubcrawl/search/graph"
-                }
-            ]
-        },
-        {
-            "id": "seqpeek_protein_mutations",
-            "label": "Protein Mutations Per Cancer Type",
-            "isOpen": false,
-            "position": {
-                "top": 300,
-                "left": 20
-            },
-            "views": [
-                {
-                    "view": "seqpeek",
-                    "label": "SeqPeek",
-                    "datamodel": "datamodel/mutations/Protein_Mutations_Per_Cancer_Type"
+                    "view": "views/pivot_data_view",
+                    "label": "MutSig Top 20",
+                    "dimensions": {
+                        "pivot": "cancer",
+                        "values": "gene",
+                        "groupBy": "rank"
+                    },
+                    "datamodel": {
+                        "uri": "datamodel/mutations/mutsig_top20",
+                        "query_all_genes": true
+                    }
                 }
             ]
         },
         {
             "id": "sample_distributions",
             "label": "Sample Distributions",
-            "isOpen": false,
             "position": {
                 "top": 20,
                 "left": 200
             },
+            "isOpen": false,
             "views": [
                 {
-                    "view": "feature_matrix_distributions",
+                    "view": "views/fmx_distributions/view",
                     "label": "Feature Selector",
-                    "datamodel": "datamodel/feature_matrices",
-                    "by_tumor_type": "tumor_type",
-                    "url_suffix": "/feature_matrix"
+                    "datamodels": {
+                        "gene_features": {
+                            "uri": "datamodel/tcga_datawarehouse",
+                            "url_suffix": "/feature_matrix",
+                            "query_tags": true
+                        },
+                        "clinical_features": {
+                            "uri": "datamodel/tcga_datawarehouse",
+                            "url_suffix": "/feature_matrix",
+                            "query_clinical_variables": true
+                        }
+                    },
+                    "feature_sources_order": {
+                        "GEXP": 1
+                    }
                 }
             ]
         },
         {
             "id": "copy_number_distributions",
             "label": "Copy Number Distributions",
-            "isOpen": false,
             "position": {
-                "top": 50,
-                "left": 50
+                "top": 75,
+                "left": 125
             },
             "views": [
                 {
-                    "view": "stacksvis",
+                    "view": "views/stacksvis/view",
                     "label": "Distributions",
                     "datamodels": {
-                        "copy_number": "datamodel/copy_number/copy_number_gistic2",
-                        "q_value": "datamodel/copy_number/copy_number_qvalue"
+                        "copy_number": {
+                            "uri": "datamodel/tcga_datawarehouse",
+                            "url_suffix": "/copy_number_gistic"
+                        },
+                        "q_value": "datamodel/copy_number/copy_number_qvalue",
+                        "mutated_samples": {
+                            "uri": "datamodel/tcga_datawarehouse",
+                            "url_suffix": "/mutated_samples"
+                        }
                     }
                 }
             ]
@@ -111,21 +103,25 @@
         {
             "id": "quick_tutorial",
             "label": "Welcome to GeneSpot",
-            "description": "General information about this web application",
-            "isOpen": false,
+            "description": "This application allows users to view a variety of interactive visualizations of TCGA data.  Each particular 'open' button will activate the specified analysis.",
+            "buttonLabel": "Quick Guide",
+            "isPrimary": true,
+            "order": 1,
+            "isOpen": true,
+            "keywords": ["Help", "Report a Bug"],
             "position": {
-                "top": 20,
+                "top": 10,
                 "left": 200
             },
             "views": [
                 {
-                    "view": "atlas_quick_tutorial",
+                    "view": "views/gs/atlas_quick_tutorial",
                     "label": "Quick Guide"
                 },
                 {
-                    "view": "atlas_maptext",
+                    "view": "views/gs/atlas_maptext_view",
                     "label": "Overview",
-                    "text": "This tool provides a way to view TCGA data from a gene-centric point-of-view. It includes a number of interactive visualizations, and allows the user to save their current exploration. This application also enables the user to select specific cancers and genes of interest, and load data that is generated from a variety of TCGA analysis.",
+                    "text": "This tool provides a way to view TCGA data from a gene-centric point-of-view. It includes a number of interactive visualizations, and allows the user to save their current exploration. This application also enables the user to select specific tumor types and genes of interest, and load data that is generated from a variety of TCGA analysis.",
                     "links": [
                         {
                             "label": "TCGA Home",
@@ -138,25 +134,10 @@
                         {
                             "label": "Contact Us",
                             "url": "mailto:info@csacr.org?subject=GeneSpot Questions"
-                        }
-                    ]
-                },
-                {
-                    "view": "atlas_maptext",
-                    "label": "Software Releases",
-                    "text": "The GeneSpot team follows Agile software practices. Our primary goal is to prioritize new features and bug fixes and rapidly deploy them to users. We welcome you to visit our development sandbox to preview and test new and experimental features.",
-                    "links": [
-                        {
-                            "label": "Development Branches",
-                            "url": "/branches"
                         },
                         {
                             "label": "Issues, Bugs, and Feature Suggestions ",
                             "url": "https://github.com/cancerregulome/GeneSpot/issues"
-                        },
-                        {
-                            "label": "Feedback",
-                            "url": "mailto:info@csacr.org?subject=GeneSpot Feedback"
                         }
                     ]
                 }

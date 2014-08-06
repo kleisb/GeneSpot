@@ -1,0 +1,38 @@
+<table class="table table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th>Tumor Type</th>
+        <th>MutSig Rank</th>
+        <th>Samples (#)</th>
+        <th style="text-align: center;"><canvas class="seqpeek-mini-locator" width="400" height="24"></canvas></th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#each items}}
+        <tr>
+            <td>{{tumor_type_label}}</td>
+            <td>{{mutsig_rank}}</td>
+            <td>{{statistics.samples.numberOf}}</td>
+            <td id="seqpeek-row-{{tumor_type}}"></td>
+        </tr>
+    {{/each}}
+    <tr>
+        <td style="color: blue;">COMBINED</td>
+        <td></td>
+        <td>{{total.samples}}</td>
+        <td id="seqpeek-all-row"></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td id="seqpeek-tick-element"></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td id="seqpeek-protein-domain-element"></td>
+    </tr>
+    </tbody>
+</table>

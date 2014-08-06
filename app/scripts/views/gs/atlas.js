@@ -1,397 +1,319 @@
 define([
     "jquery", "underscore", "backbone",
     "hbs!templates/gs/atlas",
-    "hbs!templates/gs/atlasmap",
-    "hbs!templates/line_item",
-    "hbs!templates/open_link",
-    "views/gs/atlas_quick_tutorial",
-    "views/gs/atlas_maptext_view",
-    "views/gs/seqpeek_view",
-    "views/gs/mutsig_grid_view",
-    "views/gs/mutsig_top_genes_view",
-    "views/gs/stacksvis",
-    "views/gs/feature_matrix_distributions",
-    "views/gs/seqpeek_view_v2"
+    "hbs!templates/gs/maps_list_container",
+    "views/gs/atlas_map",
+    "views/genes/control",
+    "views/clinvarlist/control",
+    "views/samplelist/control",
+    "views/gs/tumor_types_control",
+    "views/datamodel_collector/control",
+    "views/collected_maps/control",
+    "views/datasheets/control"
+
 ],
-    function ($, _, Backbone, AtlasTpl, AtlasMapTpl, LineItemTpl, OpenLinkTpl, QuickTutorialView, MapTextView, SeqPeekView, MutsigGridView, MutsigTopGenesView, StacksVisView, FeatureMatrixDistributionsView, SeqPeekViewV2) {
+    function ($, _, Backbone, AtlasTpl, MapsListContainerTpl, AtlasMapView,
+              GenelistControl, ClinicalListControl, SampleListControl, TumorTypesControl, DatamodelCollectorControl,
+              CollectedMapsControl, DatasheetsControl) {
 
         return Backbone.View.extend({
+            "datasheetsControl": new DatasheetsControl({}),
             "last-z-index": 10,
-            "currentZoomLevel": 1.0,
             "lastPosition": {
                 "top": 0, "left": 0
             },
-            "view_specs_by_uid": {},
 
             events: {
-                "click a.refresh-loaded": function () {
-                    _.each(this.$el.find(".atlas-map"), this.loadMapData);
+                "click .refresh-loaded": "__reload_all_maps",
+                "click .list-controls li a": function(e) {
+                    this.$el.find(".list-container.collapse.in").collapse("hide");
                 },
-                "click a.zoom-in": function () {
-                    this.currentZoomLevel = this.currentZoomLevel * 1.15;
-                    this.zoom(this.currentZoomLevel);
-                },
-                "click a.zoom-out": function () {
-                    this.currentZoomLevel = this.currentZoomLevel * 0.85;
-                    this.zoom(this.currentZoomLevel);
-                },
-                "click a.zoom-home": function () {
-                    this.currentZoomLevel = 1.0;
-                    this.zoom(this.currentZoomLevel);
-                },
-                "click a.resize-item": function (e) {
-                    var li = $(e.target).parents("li");
-                    if (li.hasClass("active")) {
-                        this.$el.find(".atlas-map").resizable("destroy");
-                    } else {
-                        this.$el.find(".atlas-map").resizable({ "ghost": true});
-                    }
-                    li.toggleClass("active");
-                },
-                "click a.minimize-me": function (e) {
-                    this.closeMap($(e.target).parents(".atlas-map"));
-                },
-                "click a.refresh-me": function (e) {
-                    this.loadMapData($(e.target).parents(".atlas-map"));
-                },
-                "click a.open-map": function (e) {
-                    var mapId = $(e.target).data("id");
-                    _.each(this.options.model.get("maps"), function (map) {
-                        if (_.isEqual(map.id, mapId)) {
-                            map.isOpen = true;
-                            this.appendAtlasMap(map);
-                        }
-                    }, this);
+                "click .open-map": function (e) {
+                    this.$el.find(".list-container.collapse.in").collapse("hide");
+
+                    var map_id = $(e.target).data("id");
+                    var map_template = this.model.get("map_templates").get(map_id);
+                    this.__append_atlasmap(map_template);
+
+                    var openMaps = (localStorage.getItem("open-maps") || "").split(",");
+                    openMaps.push(map_id);
+                    localStorage.setItem("open-maps", _.unique(openMaps));
                 },
                 "click div.atlas-map": function (e) {
+                    this.$el.find(".list-container.collapse.in").collapse("hide");
+
                     var $target = $(e.target);
                     if (!$target.hasClass("atlas-map")) {
                         $target = $(e.target).parents(".atlas-map");
                     }
 
-                    $target.css("z-index", this.nextZindex());
+                    $target.css("z-index", this.__next_z_index());
                 }
             },
 
-            initialize: function (options) {
-                _.bindAll(this, "loadView", "initMaps", "appendAtlasMap", "loadMapData", "loadMapContents", "closeMap");
-                _.bindAll(this, "zoom", "init_genelist_typeahead", "nextZindex", "nextPosition", "currentState");
+            initialize: function () {
+                _.bindAll(this, "__append_atlasmap", "__reload_all_maps");
 
-                this.$el.html(AtlasTpl());
-                this.$el.find(".atlas-zoom").draggable({ "scroll": true, "cancel": "div.atlas-map" });
-
-                _.defer(this.init_genelist_typeahead);
+                this.model = this.options.model;
+                this.model.set("atlas_map_views", []);
+                this.model.on("load", this.__init_genelist_control, this);
+                this.model.on("load", this.__init_clinicallist_control, this);
+                this.model.on("load", this.__init_samplelist_control, this);
+                this.model.on("load", this.__init_tumortypes_control, this);
+                this.model.on("load", this.__init_datamodel_collector, this);
+//                this.model.on("load", this.__init_collected_maps_control, this);
+                this.model.on("load", this.__init_datasheets_control, this);
 
                 WebApp.Sessions.Producers["atlas_maps"] = this;
-                this.options.model.on("load", this.initMaps);
-
-                WebApp.Events.on("webapp:tumor-types:selector:change", function() {
-                    _.each(this.$el.find(".atlas-map"), this.loadMapData);
-                }, this);
-
-                WebApp.Views["atlas_quick_tutorial"] = QuickTutorialView;
-                WebApp.Views["atlas_maptext"] = MapTextView;
-                WebApp.Views["seqpeek"] = SeqPeekView;
-                WebApp.Views["mutsig_grid"] = MutsigGridView;
-                WebApp.Views["mutsig_top_genes"] = MutsigTopGenesView;
-                WebApp.Views["stacksvis"] = StacksVisView;
-                WebApp.Views["feature_matrix_distributions"] = FeatureMatrixDistributionsView;
-                WebApp.Views["seqpeekv2"] = SeqPeekViewV2;
-
-                console.log("atlas:registered views")
             },
 
-            initMaps: function () {
-                var maps = this.options.model.get("maps");
-                _.each(_.sortBy(maps, "label"), function (map) {
-                    if (!map.id) map.id = Math.round(Math.random() * 10000);
-                    var lit = { "a_class": "open-map", "id": map.id, "label": map.label };
-                    if (map.disabled) {
-                        lit = { "li_class": "disabled", "id": map.id, "label": map.label };
-                    }
-                    this.$el.find(".maps-selector").append(LineItemTpl(lit));
-                }, this);
-
-                if (WebApp.Sessions.Active) {
-                    var session_atlas = WebApp.Sessions.Active.get("atlas_maps");
-                    if (session_atlas) {
-                        if (session_atlas.genes) {
-                            var UL = this.$el.find(".gene-selector");
-                            UL.empty();
-                            _.each(session_atlas.genes, function (gene) {
-                                UL.append(LineItemTpl({ "label": gene, "id": gene, "a_class": "item-remover", "i_class": "icon-trash" }));
-                                UL.find(".item-remover").click(function (e) {
-                                    $(e.target).parent().remove();
-                                });
-                            });
-                        }
-
-                        // TODO : Restore selected tumor types from session
-
-                        if (session_atlas.maps) {
-                            maps = _.compact(_.map(session_atlas.maps, function (mapFromSession) {
-                                var matchedMap = _.find(maps, function (m) {
-                                    return _.isEqual(m.id, mapFromSession.id);
-                                });
-                                if (matchedMap) {
-                                    return _.extend({}, matchedMap, mapFromSession);
-                                }
-                                return null;
-                            }));
-                        }
-                    }
-                }
-                _.each(maps, function (map) {
-                    if (map.isOpen) this.appendAtlasMap(map);
-                }, this);
+            render: function() {
+                this.$el.html(AtlasTpl());
+                return this;
             },
 
-            appendAtlasMap: function (map) {
-                map = _.clone(map);
-
-                var uid = Math.round(Math.random() * 10000);
-                _.each(map.views, function (view, idx) {
-                    if (!_.has(view, "view")) view["view"] = view["id"];
-
-                    if (idx == 0) view["li_class"] = "active";
-                    view["uid"] = ++uid;
-
-                    this.view_specs_by_uid[uid] = view;
-                }, this);
-
-                map.assignedPosition = map.position || this.nextPosition();
-                map.assignedZindex = map.zindex || this.nextZindex();
-
-                this.$el.find(".atlas-zoom").append(AtlasMapTpl(map));
-                var $atlasMap = this.$el.find(".atlas-zoom").children().last();
-
-                $atlasMap.find(".info-me").popover({
-                    "title": "Description",
-                    "trigger": "hover",
-                    "content": map.description
+            __init_genelist_control: function() {
+                this.genelistControl = new GenelistControl({
+                    "default_genelist": this.model.get("default_genelist"),
+                    "all_tags_url": this.model.get("all_tags_url")
                 });
-
-                var _this = this;
-                this.$el.find(".maps-btn").effect("transfer", {
-                    "to": $atlasMap,
-                    complete: function () {
-                        _this.loadMapData($atlasMap);
-                        $atlasMap.draggable({ "handle": ".icon-move", "scroll": true });
+                this.genelistControl.on("ready", this.__init_maps, this);
+                this.genelistControl.on("updated", function (ev) {
+                    console.debug("atlas.__init_genelist_control:updated:" + JSON.stringify(ev));
+                    if (ev["reorder"]) {
+                        console.debug("atlas.__init_genelist_control:updated:reorder:ignore");
+                        return;
                     }
-                }, 750);
-            },
 
-            loadMapData: function (atlasMap) {
-                var UL = $(atlasMap).find(".download-links");
-                UL.empty();
-                _.each($(atlasMap).find(".map-contents"), function (mc) {
-                    _.defer(function (_this) {
-                        var downloadUrl = _this.loadMapContents(mc);
-                        if (downloadUrl) {
-                            _.defer(function () {
-                                UL.append(OpenLinkTpl({ "label": $(mc).data("label"), "url": downloadUrl }))
-                            });
-                        }
-                    }, this);
+                    this.__reload_all_maps();
                 }, this);
+
+                this.$el.find(".genelist-container").html(this.genelistControl.render().el);
             },
 
-            loadMapContents: function (contentContainer, view_options, query_options) {
-                var $target = $(contentContainer);
-                var view_name = $target.data("view");
-                if (view_name) {
-                    var afn = function (link) {
-                        return $(link).data("id")
-                    };
-
-                    var tumor_type_list = _.pluck(WebApp.UserPreferences.get("selected_tumor_types"), "id");
-                    var geneList = _.map(this.$el.find(".gene-selector .item-remover"), afn);
-
-                    var v_options = _.extend({ "genes": geneList, "cancers": tumor_type_list, "hideSelector": true }, view_options || {});
-                    var q_options = _.extend({ "gene": geneList, "cancer": tumor_type_list }, query_options || {});
-
-                    return this.loadView($target, view_name, v_options, q_options);
-                }
-                return null;
-            },
-
-            loadView: function (targetEl, view_name, options, query) {
-                console.log("atlas:loadView:view=" + view_name);
-                var ViewClass = WebApp.Views[view_name];
-                if (ViewClass) {
-                    var view_spec = this.view_specs_by_uid[$(targetEl).data("uid")];
-
-                    var query_options = { "query": query };
-                    if (view_spec["by_tumor_type"]) query_options = { "query": _.omit(query, "cancer") };
-
-                    // 1. Lookup model specification(s) for datamodel(s)
-                    var modelspecs = [];
-                    var appendModelSpecsFn = function(modelspec, datamodel_key) {
-                        if (modelspec["by_tumor_type"]) {
-                            _.each(modelspec["by_tumor_type"], function(modelspec, tumor_type) {
-                                var dk_tt = { "datamodel_key": datamodel_key, "tumor_type": tumor_type };
-                                modelspecs.push(_.extend(dk_tt, modelspec));
-                            });
-                        } else if (modelspec["single"]) {
-                            modelspecs.push(_.extend({ "datamodel_key": datamodel_key }, modelspec["single"]));
-                        }
-                    };
-
-                    if (view_spec["datamodels"]) {
-                        _.each(view_spec["datamodels"], function(datamodel, datamodel_key) {
-                            appendModelSpecsFn(WebApp.Datamodel.find_modelspecs(datamodel), datamodel_key);
-                        });
-                    } else if (view_spec["datamodel"]) {
-                        appendModelSpecsFn(WebApp.Datamodel.find_modelspecs(view_spec["datamodel"]), "model");
+            __init_clinicallist_control: function() {
+                this.clinicalListControl = new ClinicalListControl({ "url": this.model.get("all_clinical_url") });
+                this.clinicalListControl.on("updated", function (ev) {
+                    console.debug("atlas.__init_clinicallist_control:updated:" + JSON.stringify(ev));
+                    if (ev["reorder"]) {
+                        console.debug("atlas.__init_clinicallist_control:updated:reorder:ignore");
+                        return;
                     }
 
-                    var model_bucket = {};
-                    var createViewFn = _.after(modelspecs.length, function () {
-                        // NOTE: May seem out of order, but is called after all modelspecs are turned to models
-                        // 3. Create view and pass model_bucket
-                        var model_obj = { "models": model_bucket };
-                        var model_arr = _.values(model_bucket);
-                        if (model_arr.length === 1) {
-                            if (view_spec["by_tumor_type"]) {
-                                var by_tumor_type = {};
-                                _.each(_.omit(_.first(model_arr), "by_tumor_type"), function(ttModel, tt) {
-                                    by_tumor_type[tt] = ttModel;
-                                });
-                                model_obj = { "models": by_tumor_type };
-                                model_arr = _.values(by_tumor_type);
-                            } else {
-                                model_obj = { "model": _.first(model_arr) };
-                            }
+                    this.__reload_all_maps();
+                }, this);
+
+                this.$el.find(".clinvarlist-container").html(this.clinicalListControl.render().el);
+            },
+
+            __init_samplelist_control: function() {
+                this.sampleListControl = new SampleListControl({});
+                this.sampleListControl.on("updated", function (ev) {
+                    console.debug("atlas.__init_samplelist_control:updated:" + JSON.stringify(ev));
+                    if (ev["reorder"]) {
+                        console.debug("atlas.__init_samplelist_control:updated:reorder:ignore");
+                        return;
+                    }
+
+                    this.__reload_all_maps();
+                }, this);
+
+                this.$el.find(".samplelist-container").html(this.sampleListControl.render().el);
+            },
+
+            __init_collected_maps_control: function() {
+                this.collectedMapsControl = new CollectedMapsControl({});
+                this.collectedMapsControl.on("selected", function (ev) {
+                    console.debug("atlas.__init_collected_maps_control:selected:" + JSON.stringify(ev));
+                }, this);
+                this.$el.find(".collected-maps-container").html(this.collectedMapsControl.render().el);
+            },
+
+            __init_datasheets_control: function() {
+                this.$el.find(".datasheets-container").html(this.datasheetsControl.render().el);
+            },
+
+            __init_tumortypes_control: function() {
+                this.tumorTypesControl = new TumorTypesControl({});
+                this.$el.find(".tumor-types-container").html(this.tumorTypesControl.render().el);
+            },
+
+            __init_datamodel_collector: function() {
+                this.datamodelCollectorControl = new DatamodelCollectorControl({});
+
+                var reloadFn = _.debounce(this.__reload_all_maps, 1000);
+                this.datamodelCollectorControl.on("updated", reloadFn, this);
+                this.$el.find(".datamodel-collector-container").html(this.datamodelCollectorControl.render().el);
+            },
+
+            __init_maps: function () {
+                var open_maps = this.model.get("map_templates").values();
+
+                var remembered_open = _.compact((localStorage.getItem("open-maps") || "").split(","));
+
+                var maps = _.map(open_maps, function(map_template) {
+                    if (!_.isEmpty(remembered_open)) {
+                        map_template.set("isOpen", _.contains(remembered_open, map_template.get("id")));
+                    }
+
+                    if (map_template.get("isOpen")) _.defer(this.__append_atlasmap, map_template);
+
+                    if (!map_template.get("disabled")) {
+                        var openMapFn = this.__append_atlasmap;
+                        var map_label = map_template.get("label");
+                        var view_labels = _.pluck(map_template.get("views") || [], "label");
+                        var map_keywords = map_template.get("keywords") || [];
+                        WebApp.Search.add_callback("Visualizations", map_label, _.flatten([view_labels, map_keywords]), function() {
+                            _.defer(openMapFn, map_template);
+                        });
+                    }
+                    return map_template.toJSON();
+                }, this);
+
+                var marked_open = _.where(maps, { "isOpen": true });
+                localStorage.setItem("open-maps", _.unique(_.pluck(marked_open, "id")));
+
+                this.$el.find(".maps-list-container").html(MapsListContainerTpl({ "maps": _.sortBy(_.sortBy(maps, "label"), "order") }));
+            },
+
+            __append_atlasmap: function (map_template) {
+                console.debug("atlas.__append_atlasmap");
+
+                var gene_list = this.genelistControl.get_current();
+                var tumor_type_list = _.pluck(WebApp.UserPreferences.get("selected_tumor_types"), "id");
+                var clinvar_list = this.clinicalListControl.get_current() || [];
+
+                var views = _.map(map_template.get("view_templates"), function(view_template) {
+                    return view_template.spin({
+                        "genes": gene_list,
+                        "tumor_types": tumor_type_list,
+                        "clinical_variables": clinvar_list,
+                        "datasheets_control": this.datasheetsControl
+                    });
+                }, this);
+
+                var atlasMapView = new AtlasMapView(_.extend(map_template.toJSON(), {
+                    "isOpen": true,
+                    "assignedPosition": map_template.get("position") || this.__next_position(),
+                    "assignedZindex": map_template.get("zindex") || this.__next_z_index(),
+                    "views": views
+                }));
+                atlasMapView.on("refresh", this.__reload_map_views, this);
+                atlasMapView.on("collect", this.__collect_map, this);
+
+                _.each(views, function(view) {
+                    this.__assemble_query(view, gene_list, tumor_type_list, clinvar_list);
+                }, this);
+
+                this.model.get("atlas_map_views").push(atlasMapView);
+                this.$el.find(".atlas-canvas").append(atlasMapView.render().el);
+
+                _.each(views, this.__fetch_model_data, this);
+            },
+
+            __reload_all_maps: function() {
+                console.debug("atlas.__reload_all_maps");
+                _.each(this.model.get("atlas_map_views"), this.__reload_map_views, this);
+            },
+
+            __reload_map_views: function (atlasMapView) {
+                if (!atlasMapView.options["isOpen"]) return;
+
+                console.debug("atlas.__reload_map_views:" + atlasMapView.id);
+
+                var gene_list = this.genelistControl.get_current();
+                var tumor_type_list = _.pluck(WebApp.UserPreferences.get("selected_tumor_types"), "id");
+                var clinvar_list = this.clinicalListControl.get_current() || [];
+
+                _.each(atlasMapView["views"], function(view) {
+                    view.options = _.extend(view.options, {
+                        "genes": gene_list,
+                        "tumor_types": tumor_type_list,
+                        "clinical_variables": clinvar_list
+                    });
+                }, this);
+
+                _.each(atlasMapView["views"], function(view) {
+                    this.__assemble_query(view, gene_list, tumor_type_list, clinvar_list);
+                }, this);
+
+                atlasMapView.render();
+
+                _.each(atlasMapView["views"], this.__fetch_model_data, this);
+            },
+
+            __assemble_query: function(view, gene_list, tumor_type_list, clinvar_list) {
+                console.debug("atlas.__assemble_query");
+                if (!_.has(view.options, "all_models")) return;
+
+                _.each(view.options["all_models"], function(model) {
+                    var data = model["base_query"] || {};
+                    if (!model["tumor_type"]) data["cancer"] = tumor_type_list;
+
+                    model["do_fetch"] = true;
+                    if (model["query_clinical_variables"]) {
+                        if (_.isEmpty(clinvar_list)) {
+                            model["do_fetch"] = false;
+                            return;
+                        }
+                        data["id"] = _.pluck(clinvar_list, "id");
+                    } else if (model["query_tags"]) {
+                        data["tags"] = gene_list;
+                    } else if (!model["query_all_genes"]) {
+                        data["gene"] = gene_list;
+                    }
+
+                    model["query"] = data;
+                });
+            },
+
+            __fetch_model_data: function(view) {
+                console.debug("atlas.__fetch_model_data");
+                if (!_.has(view.options, "all_models")) return;
+
+                _.each(view.options["all_models"], function(model) {
+                    _.defer(function () {
+                        if (model["do_fetch"] === false) {
+                            model.trigger("load");
+                            return;
                         }
 
-                        var view = new ViewClass(_.extend({}, options, view_spec, model_obj));
-                        $(targetEl).html(view.render().el);
-
-                        // 4. Fetch data and load models
-                        _.each(model_arr, function (model) {
-                            _.defer(function () {
-                                model.fetch({
-                                    "url": model.get("url"),
-                                    "data": query_options["query"],
-                                    "traditional": true,
-                                    "success": function () {
-                                        model.trigger("load");
-                                    }
-                                });
-                            });
+                        model.fetch({
+                            "url": model["url"],
+                            "data": model["query"],
+                            "traditional": true,
+                            "success": function () {
+                                model.trigger("load");
+                            }
                         });
                     });
-
-                    // 2. Create model(s) from model specifications
-                    _.each(modelspecs, function (modelspec) {
-                        var prepModelFn = function (Model) {
-                            var model = new Model(modelspec);
-                            if (view_spec["url_suffix"]) {
-                                model.set("url", model.get("url") + view_spec["url_suffix"]);
-                            }
-
-                            if (modelspec["tumor_type"]) {
-                                var modelspec_group = model_bucket[modelspec["datamodel_key"]];
-                                if (!modelspec_group) modelspec_group = model_bucket[modelspec["datamodel_key"]] = {};
-                                modelspec_group[modelspec["tumor_type"]] = model;
-                            } else {
-                                model_bucket[modelspec["datamodel_key"]] = model;
-                            }
-
-                            createViewFn();
-                        };
-
-                        if (modelspec["model"]) {
-                            require([modelspec["model"]], prepModelFn);
-                        } else {
-                            prepModelFn(Backbone.Model);
-                        }
-                    });
-
-                    // TODO : Specify download links
-//                    if (map_optns["url"]) return map_optns["url"] + "?" + this.outputTsvQuery(query);
-                }
-                return null;
-            },
-
-            outputTsvQuery: function (query) {
-                var qsarray = [];
-                _.each(query, function (values, key) {
-                    if (_.isArray(values)) {
-                        _.each(values, function (value) {
-                            qsarray.push(key + "=" + value);
-                        })
-                    } else {
-                        qsarray.push(key + "=" + values);
-                    }
-                });
-                qsarray.push("output=tsv");
-                return qsarray.join("&");
-            },
-
-            closeMap: function (atlasMap) {
-                $(atlasMap).effect("transfer", {
-                    "to": this.$el.find(".maps-btn"),
-                    complete: function () {
-                        $(atlasMap).remove();
-                    }
-                }, 750);
-            },
-
-            zoom: function (zoomLevel) {
-                this.$el.find(".atlas-zoom").zoomTo({
-                    "duration": 1000,
-                    "scalemode": "both",
-                    "easing": "ease",
-                    "nativeanimation": true,
-                    "root": this.$el.find(".atlas-canvas"),
-                    "closeclick": false,
-                    "targetsize": zoomLevel
                 });
             },
 
-            init_genelist_typeahead: function () {
-                var genelist = WebApp.Lookups.get("genes").get("keys");
-
-                var UL = this.$el.find(".gene-selector");
-                this.$el.find(".genes-typeahead").typeahead({
-                    source: function (q, p) {
-                        p(_.compact(_.flatten(_.map(q.toLowerCase().split(" "), function (qi) {
-                            return _.map(genelist, function (geneitem) {
-                                if (geneitem.toLowerCase().indexOf(qi) >= 0) return geneitem;
-                            });
-                        }))));
-                    },
-
-                    updater: function (gene) {
-                        UL.append(LineItemTpl({ "label": gene, "id": gene, "a_class": "item-remover", "i_class": "icon-trash" }));
-                        UL.find(".item-remover").click(function (e) {
-                            $(e.target).parent().remove();
-                        });
-                        return "";
-                    }
-                });
-
-                UL.find(".item-remover").click(function (e) {
-                    $(e.target).parent().remove();
-                });
-
-                UL.sortable();
+            __next_z_index: function () {
+                var nextOne = 1 + this["last-z-index"];
+                this["last-z-index"] = nextOne;
+                return nextOne;
             },
 
-            nextZindex: function () {
-                var nextZindex = 1 + this["last-z-index"];
-                this["last-z-index"] = nextZindex;
-                return nextZindex;
-            },
-
-            nextPosition: function () {
+            __next_position: function () {
                 var lastPos = {
                     "left": this.lastPosition.left + 50,
                     "top": this.lastPosition.top + 50
                 };
                 this.lastPosition = lastPos;
                 return lastPos;
+            },
+
+            __collect_map: function(atlasMapView) {
+                console.debug("atlas.__collect_map:" + atlasMapView.id);
+
+                var collectedMap = _.omit(atlasMapView.options, "assignedPosition", "assignedZindex", "view_classes", "view_templates", "views");
+                collectedMap["views"] = _.map(atlasMapView.options["views"], function(v) {
+                    return _.omit(v.options, "id", "all_models", "model", "models", "model_templates", "view_class");
+                });
+
+                this.collectedMapsControl.add_to_current(collectedMap);
             },
 
             currentState: function () {
@@ -403,13 +325,9 @@ define([
                     return { "id": mapid, "isOpen": true, "position": { "top": top, "left": left }, "zindex": zindex };
                 });
 
-                var afn = function (link) {
-                    return $(link).data("id")
-                };
-
                 var tumor_type_list = _.pluck(WebApp.UserPreferences.get("selected_tumor_types"), "id");
                 return {
-                    "genes": _.map(this.$el.find(".gene-selector .item-remover"), afn),
+                    "genes": this.genelistControl.get_current(),
                     "tumor_types": tumor_type_list,
                     "maps": openMaps
                 }
